@@ -4,23 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Crystal Match</title>
-<script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-
+<script src="https://telegram.org/js/telegram-web-app.js?62"></script>
 <!-- Richads Ads Network — pubId:857423 appId:398611 -->
-<script>
-  (function(){
-    var s = document.createElement('script');
-    s.src = 'https://richinfo.co/richpartners/telegram/js/tg-ob.js';
-    s.async = true;
-    s.onload = function() {
-      try {
-        window.TelegramAdsController = new TelegramAdsController();
-        window.TelegramAdsController.initialize({ pubId: "857423", appId: "398611" });
-      } catch(e) { console.warn('Richads init error:', e.message); }
-    };
-    document.head.appendChild(s);
-  })();
-</script>
+
+          <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+          <script>
+            window.TelegramAdsController = new TelegramAdsController();
+            window.TelegramAdsController.initialize({
+              pubId: "857423",
+              appId: "7662",
+            });
+          </script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root {
