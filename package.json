@@ -1,0 +1,16 @@
+{
+  "name": "crystal-match-app",
+  "version": "1.0.0",
+  "description": "Crystal Match Telegram Mini App + Bot",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
