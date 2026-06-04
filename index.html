@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://telegram.org/js/telegram-web-app.js?62"></script>
+          <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+          <script>
+            window.TelegramAdsController = new TelegramAdsController();
+            window.TelegramAdsController.initialize({
+              pubId: "857423",
+              appId: "7662",
+            });
+          </script>  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Crystal Match</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://w.tads.me/widget.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -373,30 +380,6 @@
   }
   #combo-banner.show { opacity:1; transform:translateX(-50%) scale(1); }
 
-  /* ── TADS Ad Screen ── */
-  #tads-screen { padding:0; }
-  .tads-wrap {
-    flex:1; display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    padding:24px; gap:20px;
-  }
-  .tads-title {
-    font-family:'Orbitron',monospace; font-size:20px; font-weight:700;
-    color:var(--gold); text-align:center;
-  }
-  .tads-desc { font-size:13px; color:var(--text2); text-align:center; line-height:1.6; }
-  .tads-reward-box {
-    background:var(--panel); border:1px solid var(--border);
-    border-radius:16px; padding:16px 24px; text-align:center;
-  }
-  .tads-reward-val { font-family:'Orbitron',monospace; font-size:28px; color:var(--gold); }
-  .tads-reward-lbl { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
-  #tads-container-9940 { width:100%; max-width:340px; min-height:80px; }
-  .skip-ad-btn {
-    font-size:12px; color:var(--text2); text-decoration:underline;
-    cursor:pointer; background:none; border:none; margin-top:8px;
-  }
-
   /* scrollbar */
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
@@ -453,9 +436,9 @@
       <div class="mb-icon">📋</div>
       <div class="mb-label">Daily Quests</div>
     </div>
-    <div class="menu-btn" onclick="showTadsAd(false)">
-      <div class="mb-icon">📺</div>
-      <div class="mb-label">Earn Gems</div>
+    <div class="menu-btn" onclick="showScreen('home'); showAchievements()">
+      <div class="mb-icon">🎖</div>
+      <div class="mb-label">Achievements</div>
     </div>
   </div>
 </div>
@@ -561,24 +544,6 @@
   <div class="overlay-btns">
     <div class="btn-outline" onclick="goHome()">🏠 Home</div>
     <div class="btn-primary" style="max-width:160px" onclick="startGame()">Retry</div>
-  </div>
-</div>
-
-<!-- ══════════════ TADS AD SCREEN ══════════════ -->
-<div class="screen" id="tads-screen">
-  <div class="screen-header">
-    <div class="back-btn" onclick="skipTadsAd()">←</div>
-    <div class="screen-title">EARN GEMS 💎</div>
-  </div>
-  <div class="tads-wrap">
-    <div class="tads-title">Watch & Earn!</div>
-    <div class="tads-desc">Ad dekho aur bonus gems kamao apne next level ke liye!</div>
-    <div class="tads-reward-box">
-      <div class="tads-reward-val">+20 💎</div>
-      <div class="tads-reward-lbl">Reward on completion</div>
-    </div>
-    <div id="tads-container-9940"></div>
-    <button class="skip-ad-btn" onclick="skipTadsAd()">Skip — go to next level</button>
   </div>
 </div>
 
@@ -1010,16 +975,10 @@ function showGameOver() {
 }
 
 function nextLevel() {
-  // Har 2 level ke baad TADS ad dikhao
-  const lvl = state.level || 1;
-  if (lvl % 2 === 0) {
-    showTadsAd(true);
-  } else {
-    document.getElementById('level-complete').classList.remove('show');
-    state.level = lvl + 1;
-    save();
-    startGame();
-  }
+  document.getElementById('level-complete').classList.remove('show');
+  state.level = (state.level||1)+1;
+  save();
+  startGame();
 }
 
 function goHome() {
@@ -1214,63 +1173,6 @@ function showToast(msg) {
 }
 
 function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
-
-// ══════════════════════════════════════════════
-// TADS AD NETWORK INTEGRATION
-// ══════════════════════════════════════════════
-let _tadsNextLevel = false;
-
-function showTadsAd(afterLevel) {
-  _tadsNextLevel = afterLevel || false;
-  showScreen('tads-screen');
-
-  // Thodi der baad TADS load karo (screen transition ke baad)
-  setTimeout(() => {
-    const adsNotFoundCallback = () => {
-      console.log('TADS: No ads found');
-      showToast('Koi ad available nahi — skipping');
-      setTimeout(() => skipTadsAd(), 1200);
-    };
-
-    const onClickRewardCallback = (adId) => {
-      console.log('TADS: Ad clicked:', adId);
-      addCoins(20);
-      showToast('🎉 +20 💎 earned!');
-      setTimeout(() => skipTadsAd(), 1500);
-    };
-
-    try {
-      const adController = window.tads.init({
-        widgetId: 9940,
-        type: 'static',
-        debug: false,
-        onClickReward: onClickRewardCallback,
-        onAdsNotFound: adsNotFoundCallback,
-      });
-
-      adController.loadAd()
-        .then(() => adController.showAd())
-        .catch((err) => {
-          console.log('TADS error:', err);
-          adsNotFoundCallback();
-        });
-    } catch (e) {
-      console.log('TADS init error:', e);
-      adsNotFoundCallback();
-    }
-  }, 400);
-}
-
-function skipTadsAd() {
-  if (_tadsNextLevel) {
-    document.getElementById('level-complete').classList.remove('show');
-    state.level = (state.level || 1) + 1;
-    save();
-    startGame();
-  } else {
-    goHome();
-  }
-}
 
 // ══════════════════════════════════════════════
 // INIT
