@@ -1,19 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://richinfo.co/richpartners/in-page/js/richads-ob.js?pubid=857423&siteid=398637" async></script>         
-<script src="https://telegram.org/js/telegram-web-app.js?62"></script> 
-         <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-          <script>
-            window.TelegramAdsController = new TelegramAdsController();
-            window.TelegramAdsController.initialize({
-              pubId: "857423",
-              appId: "7662",
-            });
-          </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Crystal Match</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -381,6 +373,39 @@
   }
   #combo-banner.show { opacity:1; transform:translateX(-50%) scale(1); }
 
+  /* ── AdsGram Task Screen ── */
+  #adsgram { padding:0; }
+  .ads-wrap {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:24px; gap:20px;
+  }
+  .ads-title {
+    font-family:'Orbitron',monospace; font-size:20px; font-weight:700;
+    color:var(--gold); text-align:center;
+  }
+  .ads-desc { font-size:13px; color:var(--text2); text-align:center; line-height:1.6; }
+  .ads-reward-box {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:16px; padding:16px 24px; text-align:center;
+  }
+  .ads-reward-val { font-family:'Orbitron',monospace; font-size:28px; color:var(--gold); }
+  .ads-reward-lbl { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+  adsgram-task {
+    --adsgram-task-font-size: 14px;
+    --adsgram-task-icon-size: 48px;
+    --adsgram-task-icon-border-radius: 12px;
+    --adsgram-task-button-width: 140px;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .skip-ad-btn {
+    font-size:12px; color:var(--text2); text-decoration:underline;
+    cursor:pointer; background:none; border:none; margin-top:8px;
+  }
+
   /* scrollbar */
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
@@ -437,9 +462,9 @@
       <div class="mb-icon">📋</div>
       <div class="mb-label">Daily Quests</div>
     </div>
-    <div class="menu-btn" onclick="showScreen('home'); showAchievements()">
-      <div class="mb-icon">🎖</div>
-      <div class="mb-label">Achievements</div>
+    <div class="menu-btn" onclick="showAdsGram(false)">
+      <div class="mb-icon">📺</div>
+      <div class="mb-label">Earn Gems</div>
     </div>
   </div>
 </div>
@@ -545,6 +570,32 @@
   <div class="overlay-btns">
     <div class="btn-outline" onclick="goHome()">🏠 Home</div>
     <div class="btn-primary" style="max-width:160px" onclick="startGame()">Retry</div>
+  </div>
+</div>
+
+<!-- ══════════════ ADSGRAM SCREEN ══════════════ -->
+<div class="screen" id="adsgram">
+  <div class="screen-header">
+    <div class="back-btn" id="ad-back-btn" onclick="skipAd()">←</div>
+    <div class="screen-title">EARN GEMS 💎</div>
+  </div>
+  <div class="ads-wrap">
+    <div class="ads-title">Watch & Earn!</div>
+    <div class="ads-desc">Complete the task below to earn bonus gems for your next level!</div>
+    <div class="ads-reward-box">
+      <div class="ads-reward-val">+20 💎</div>
+      <div class="ads-reward-lbl">Reward on completion</div>
+    </div>
+
+    <adsgram-task
+      data-block-id="task-32205"
+      data-debug="false"
+      data-debug-console="false"
+      class="adsgram-task-widget"
+      id="adsgram-task"
+    ></adsgram-task>
+
+    <button class="skip-ad-btn" onclick="skipAd()">Skip — go to next level</button>
   </div>
 </div>
 
@@ -976,10 +1027,16 @@ function showGameOver() {
 }
 
 function nextLevel() {
-  document.getElementById('level-complete').classList.remove('show');
-  state.level = (state.level||1)+1;
-  save();
-  startGame();
+  // Har 2 level ke baad AdsGram ad dikhao
+  const lvl = state.level || 1;
+  if (lvl % 2 === 0) {
+    showAdsGram(true); // ad dekho phir next level
+  } else {
+    document.getElementById('level-complete').classList.remove('show');
+    state.level = lvl + 1;
+    save();
+    startGame();
+  }
 }
 
 function goHome() {
@@ -1174,6 +1231,59 @@ function showToast(msg) {
 }
 
 function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ══════════════════════════════════════════════
+// ADSGRAM INTEGRATION
+// ══════════════════════════════════════════════
+let _pendingNextLevel = false;
+
+function showAdsGram(afterAd) {
+  _pendingNextLevel = afterAd || false;
+  showScreen('adsgram');
+
+  // AdsGram events listen karo
+  const taskEl = document.getElementById('adsgram-task');
+  if (!taskEl) return;
+
+  // Reward event — task complete hone par
+  taskEl.addEventListener('reward', () => {
+    addCoins(20);
+    showToast('🎉 +20 💎 earned! Well done!');
+    setTimeout(() => {
+      if (_pendingNextLevel) {
+        document.getElementById('level-complete').classList.remove('show');
+        state.level = (state.level || 1) + 1;
+        save();
+        startGame();
+      } else {
+        goHome();
+      }
+    }, 1500);
+  });
+
+  // Error event
+  taskEl.addEventListener('onError', () => {
+    showToast('Ad load nahi hua — skipping');
+    setTimeout(() => skipAd(), 1000);
+  });
+
+  // No ad available
+  taskEl.addEventListener('onBannerNotFound', () => {
+    showToast('Koi ad available nahi — skipping');
+    setTimeout(() => skipAd(), 1000);
+  });
+}
+
+function skipAd() {
+  if (_pendingNextLevel) {
+    document.getElementById('level-complete').classList.remove('show');
+    state.level = (state.level || 1) + 1;
+    save();
+    startGame();
+  } else {
+    goHome();
+  }
+}
 
 // ══════════════════════════════════════════════
 // INIT
