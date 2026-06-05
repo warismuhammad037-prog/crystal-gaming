@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://telegram.org/js/telegram-web-app.js?62"></script>
-          <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-          <script>
-            window.TelegramAdsController = new TelegramAdsController();
-            window.TelegramAdsController.initialize({
-              pubId: "857423",
-              appId: "7662",
-            });
-          </script>  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Crystal Match</title>
+
+<!-- OnClick Ad Network — Spot ID: 443157 -->
+<script src="https://js.onclckvd.com/in-stream-ad-admanager/tma.js"></script>
+<script>
+  window.initCdTma?.({ id: '443157' })
+    .then(show => { window.onclickShow = show; console.log('OnClick Ad ready ✅'); })
+    .catch(e => console.log('OnClick init error:', e));
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -436,9 +435,9 @@
       <div class="mb-icon">📋</div>
       <div class="mb-label">Daily Quests</div>
     </div>
-    <div class="menu-btn" onclick="showScreen('home'); showAchievements()">
-      <div class="mb-icon">🎖</div>
-      <div class="mb-label">Achievements</div>
+    <div class="menu-btn" onclick="playOnClickAd(null)">
+      <div class="mb-icon">📺</div>
+      <div class="mb-label">Earn Gems</div>
     </div>
   </div>
 </div>
@@ -974,11 +973,42 @@ function showGameOver() {
   document.getElementById('game-over').classList.add('show');
 }
 
+// ══════════════════════════════════════════════
+// ONCLICK AD HELPER
+// ══════════════════════════════════════════════
+function playOnClickAd(onDone) {
+  if (window.onclickShow) {
+    window.onclickShow()
+      .then(() => {
+        console.log('OnClick ad played ✅');
+        addCoins(15);
+        showToast('🎉 +15 💎 ad reward!');
+        if (onDone) onDone();
+      })
+      .catch(e => {
+        console.log('OnClick ad error:', e);
+        if (onDone) onDone(); // ad na aaye toh bhi aage jao
+      });
+  } else {
+    if (onDone) onDone();
+  }
+}
+
 function nextLevel() {
   document.getElementById('level-complete').classList.remove('show');
-  state.level = (state.level||1)+1;
-  save();
-  startGame();
+  // Har 2nd level pe OnClick ad dikhao
+  const lvl = state.level || 1;
+  if (lvl % 2 === 0) {
+    playOnClickAd(() => {
+      state.level = lvl + 1;
+      save();
+      startGame();
+    });
+  } else {
+    state.level = lvl + 1;
+    save();
+    startGame();
+  }
 }
 
 function goHome() {
