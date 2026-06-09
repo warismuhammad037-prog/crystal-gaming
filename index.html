@@ -4,43 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Crystal Match</title>
-
-<!-- Telegram Web App -->
-<script src="https://telegram.org/js/telegram-web-app.js?62"></script>
-
-          <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-          <script>
-            window.TelegramAdsController = new TelegramAdsController();
-            window.TelegramAdsController.initialize({
-              pubId: "857423",
-              appId: "7662",
-            });
-          </script>  
-
-<!-- RichAds TelegramAdsController -->
-<script>
-(function() {
-  var s = document.createElement('script');
-  s.src = 'https://richinfo.co/richpartners/telegram/js/tg-ob.js';
-  s.onload = function() {
-    try {
-      window.TelegramAdsController = new TelegramAdsController();
-      window.TelegramAdsController.initialize({
-        pubId: "857423",
-        appId: "398611",
-        debug: false
-      });
-      console.log('✅ RichAds ready');
-    } catch(e) {
-      console.warn('RichAds init error:', e.message);
-    }
-  };
-  s.onerror = function() {
-    console.warn('RichAds script load failed');
-  };
-  document.head.appendChild(s);
-})();
-</script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://w.tads.me/widget.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -408,6 +373,21 @@
   }
   #combo-banner.show { opacity:1; transform:translateX(-50%) scale(1); }
 
+  /* ── TADS Ad Banner ── */
+  .tads-banner-wrap {
+    width: 100%; max-width: 340px;
+    min-height: 60px;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .tads-overlay-wrap {
+    width: 100%; max-width: 320px;
+    min-height: 80px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 0 auto;
+  }
+
   /* scrollbar */
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
@@ -451,6 +431,11 @@
 
   <button class="btn-primary" onclick="startGame()">▶ PLAY</button>
 
+  <!-- TADS Ad Banner — Home Screen -->
+  <div class="tads-banner-wrap">
+    <div id="tads-container-9940"></div>
+  </div>
+
   <div class="menu-grid">
     <div class="menu-btn" onclick="showScreen('shop')">
       <div class="mb-icon">🛒</div>
@@ -464,9 +449,9 @@
       <div class="mb-icon">📋</div>
       <div class="mb-label">Daily Quests</div>
     </div>
-    <div class="menu-btn" onclick="triggerRichAd(null)">
-      <div class="mb-icon">📺</div>
-      <div class="mb-label">Earn Gems</div>
+    <div class="menu-btn" onclick="showScreen('home'); showAchievements()">
+      <div class="mb-icon">🎖</div>
+      <div class="mb-label">Achievements</div>
     </div>
   </div>
 </div>
@@ -559,9 +544,12 @@
   <div class="stars-row" id="stars-row">⭐⭐⭐</div>
   <div class="score-display">Score: <span id="final-score">0</span></div>
   <div class="score-display" style="font-size:16px;color:var(--gold)">+<span id="coins-earned">0</span> 💎 earned</div>
+  <!-- TADS Ad — Level Complete -->
+  <div class="tads-overlay-wrap">
+    <div id="tads-container-9940"></div>
+  </div>
   <div class="overlay-btns">
     <div class="btn-outline" onclick="goHome()">🏠 Home</div>
-    <div class="btn-outline" onclick="triggerRichAd(null)" style="border-color:var(--gold);color:var(--gold)">📺 +20💎</div>
     <div class="btn-gold"    onclick="nextLevel()">Next ▶</div>
   </div>
 </div>
@@ -570,9 +558,12 @@
   <div class="overlay-title" style="background:linear-gradient(135deg,var(--danger),#b91c1c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">GAME OVER</div>
   <div class="score-display">Score: <span id="go-score">0</span></div>
   <div class="score-display" style="font-size:14px;color:var(--text2)">Best: <span id="go-best">0</span></div>
+  <!-- TADS Ad — Game Over -->
+  <div class="tads-overlay-wrap">
+    <div id="tads-container-9940"></div>
+  </div>
   <div class="overlay-btns">
     <div class="btn-outline" onclick="goHome()">🏠 Home</div>
-    <div class="btn-outline" onclick="triggerRichAd(null)" style="border-color:var(--gold);color:var(--gold)">📺 +20💎</div>
     <div class="btn-primary" style="max-width:160px" onclick="startGame()">Retry</div>
   </div>
 </div>
@@ -590,29 +581,6 @@ if (tg) {
   tg.expand();
   tg.setHeaderColor('#0a0a1a');
   tg.setBackgroundColor('#0a0a1a');
-}
-
-// ══════════════════════════════════════════════
-// RICHADS — triggerNativeNotification
-// ══════════════════════════════════════════════
-function triggerRichAd(onDone) {
-  if (window.TelegramAdsController) {
-    window.TelegramAdsController.triggerNativeNotification(true)
-      .then((result) => {
-        console.log('✅ RichAds ad shown:', result);
-        addCoins(20);
-        showToast('🎉 +20 💎 reward mila!');
-        if (onDone) onDone();
-      })
-      .catch((result) => {
-        console.log('❌ RichAds no ad:', result);
-        showToast('Ad abhi available nahi');
-        if (onDone) onDone();
-      });
-  } else {
-    showToast('⚠️ Telegram mein open karein ads ke liye');
-    if (onDone) onDone();
-  }
 }
 
 // ══════════════════════════════════════════════
@@ -1029,19 +997,9 @@ function showGameOver() {
 
 function nextLevel() {
   document.getElementById('level-complete').classList.remove('show');
-  const lvl = state.level || 1;
-  if (lvl % 2 === 0) {
-    // Har 2nd level par auto ad
-    triggerRichAd(() => {
-      state.level = lvl + 1;
-      save();
-      startGame();
-    });
-  } else {
-    state.level = lvl + 1;
-    save();
-    startGame();
-  }
+  state.level = (state.level||1)+1;
+  save();
+  startGame();
 }
 
 function goHome() {
@@ -1243,6 +1201,85 @@ function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
 document.getElementById('home-level').textContent = state.level||1;
 document.getElementById('home-best').textContent  = state.best||0;
 refreshCoinsUI();
+
+// ══════════════════════════════════════════════
+// TADS AD NETWORK SETUP
+// ══════════════════════════════════════════════
+// ⚠️ Replace these Widget IDs with your actual IDs from tads.me dashboard
+const TADS_WIDGETS = {
+  home:          '9940',         // Home screen banner
+  levelComplete: '9940', // Level complete overlay ad
+  gameOver:      '9940',      // Game over overlay ad
+};
+
+function initTadsAd(widgetId, containerId) {
+  if (!window.tads) return; // TADS script not loaded yet
+
+  const adsNotFoundCallback = () => {
+    // Hide container if no ads available
+    const el = document.getElementById(containerId);
+    if (el) el.closest('.tads-banner-wrap, .tads-overlay-wrap').style.display = 'none';
+  };
+
+  const onClickRewardCallback = (adId) => {
+    // Optional: reward user for clicking ad (e.g. give bonus coins)
+    // addCoins(5); showToast('+5 💎 Ad reward!');
+    console.log('TADS ad clicked:', adId);
+  };
+
+  try {
+    const adController = window.tads.init({
+      widgetId: widgetId,
+      type: 'static',
+      debug: false, // true for testing, false for production
+      onClickReward: onClickRewardCallback,
+      onAdsNotFound: adsNotFoundCallback,
+    });
+
+    adController.loadAd()
+      .then(() => adController.showAd())
+      .catch(() => adsNotFoundCallback());
+  } catch(e) {
+    console.log('TADS init error:', e);
+  }
+}
+
+// Load home screen ad on page load
+document.addEventListener('DOMContentLoaded', () => {
+  initTadsAd(TADS_WIDGETS.home, 'tads-container-9940');
+});
+
+// Load overlay ads when they become visible
+const _origShowLevelComplete = showLevelComplete;
+function showLevelComplete() { // called after level ends
+  // Already defined above — hook into it
+}
+
+// Patch showLevelComplete and showGameOver to load ads
+const origNextLevel = nextLevel;
+const origGoHome    = goHome;
+
+// Watch overlay visibility to trigger ads
+const overlayObserver = new MutationObserver((mutations) => {
+  mutations.forEach(m => {
+    if (m.type === 'attributes' && m.attributeName === 'class') {
+      const el = m.target;
+      if (el.classList.contains('show')) {
+        if (el.id === 'level-complete') {
+          initTadsAd(TADS_WIDGETS.levelComplete, 'tads-container-9940');
+        } else if (el.id === 'game-over') {
+          initTadsAd(TADS_WIDGETS.gameOver, 'tads-container-9940');
+        }
+      }
+    }
+  });
+});
+
+// Observe both overlays
+['level-complete', 'game-over'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) overlayObserver.observe(el, { attributes: true });
+});
 </script>
 </body>
 </html>
